@@ -12,15 +12,40 @@
 	href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="css/jquery-mobile/jqm-demos.css">
-<link rel="stylesheet"
-	href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
 <script src="js/jquery.min.js"></script>
 <script src="js/jquery.form.js"></script>
 <script src="js/index.js"></script>
 <script src="js/jquery.mobile-1.4.5.min.js"></script>
+<style type="text/css">
+#divPopup {
+	display: none; /* Hidden by default */
+	position: fixed; /* Stay in place */
+	z-index: 1000; /* Sit on top */
+	margin: auto;
+	width: 20em; /* Full width */
+	height: 30em; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0, 0, 0); /* Fallback color */
+	background-color: #fff; /* Black w/ opacity */
+}
+
+/* Modal Content */
+.divPopup-contents {
+	background-color: #fefefe;
+	margin: auto;
+	padding: 20px;
+	border: 1px solid #888;
+	width: 70%;
+}
+</style>
 <script type="text/javascript">
+	function showDialog(x) {
+		$("#divPopup").html("");
+		$("#divPopup").load(x).trigger("create");
+		$("#divPopup").css("display", "block");
+	}
 	$(document).ready(function() {
-		loadPage('main.jsp');
+		// 		loadPage('main.jsp');
 		// 		$("div#menuContent").load('menu.jsp').trigger("create");
 	});
 	$(document).ajaxComplete(function(event, xhr, settings) {
@@ -28,6 +53,26 @@
 	});
 	function loadPage(x) {
 		$("div#mainBodyContent").load(x).trigger("create");
+	}
+	function validateForm() {
+		$("form#formID :input").each(function() {
+			if ($(this).val() == "")
+				alert($(this).attr("placeholder") + " must have a value");
+		});
+	}
+	function submitTheForm() {
+		var url = $("#RaceForm").attr("action");
+		url += "?" + $("#RaceForm").serialize();
+		$.ajax({
+			url : url,
+			cache : false,
+			success : function(data) {
+				$("#mainBodyContent").html(data);
+				$(document).trigger("create");
+				$(".ui-popup-active").css("display", "none");
+				return true;
+			}
+		});
 	}
 </script>
 </head>
@@ -47,8 +92,11 @@
 			<ul class="jqm-list ui-alt-icon ui-nodisc-icon">
 				<li data-filtertext="demos homepage" data-icon="home"><a
 					href="index.jsp">Home</a></li>
-				<li data-filtertext="demos homepage"><a href="#" onclick="loadPage('rider_reg.jsp');">Register
-						Riders</a></li>
+				<li data-filtertext="demos homepage"><a href="#"
+					onclick="loadPage('ServletTagManagement');">Tag Riders</a></li>
+				<li data-filtertext="demos homepage"><a href="#"
+					onclick="loadPage('ServletRaceManagement?reqCode=start');">Start
+						A Race</a></li>
 				<li data-role="collapsible" data-enhanced="true"
 					data-collapsed-icon="carat-d" data-expanded-icon="carat-u"
 					data-iconpos="right" data-inset="false"
@@ -56,9 +104,7 @@
 					<h3 class="ui-collapsible-heading ui-collapsible-heading-collapsed">
 						<a href="#"
 							class="ui-collapsible-heading-toggle ui-btn ui-btn-icon-right ui-btn-inherit ui-icon-carat-d">
-							Settings<span class="ui-collapsible-heading-status"> click
-								to expand contents</span>
-						</a>
+							Management </a>
 					</h3>
 					<div
 						class="ui-collapsible-content ui-body-inherit ui-collapsible-content-collapsed"
@@ -66,21 +112,26 @@
 						<ul>
 							<li
 								data-filtertext="form checkboxradio widget radio input radio buttons controlgroups"><a
-								href="t_user.do?reqCode=userManagement" data-ajax="false">User
-									Management</a></li>
+								href="#"
+								onclick="loadPage('ServletCheckPointManagement?reqCode=listCheckPoints');"
+								data-ajax="false">Check Point Management</a></li>
 							<li
 								data-filtertext="form checkboxradio widget checkbox input checkboxes controlgroups"><a
-								href="t_security.do?reqCode=roleManagement" data-ajax="false">Role
-									Management</a></li>
-							<li
-								data-filtertext="form checkboxradio widget radio input radio buttons controlgroups"><a
-								href="t_security.do?reqCode=groupManagement" data-ajax="false">Group
+								href="t_security.do?reqCode=roleManagement" data-ajax="false">Race
 									Management</a></li>
 						</ul>
 					</div>
 				</li>
 			</ul>
 		</div>
+	</div>
+	<div id="divPopup" style="display: none;"></div>
+	<div id="divPopup" class="modal">
+		<div class="divPopup-contents">
+			<span class="close" title="Close">x</span>
+			<iframe name="iframe_a" width="95%" height="600px"></iframe>
+		</div>
+
 	</div>
 </body>
 </html>
