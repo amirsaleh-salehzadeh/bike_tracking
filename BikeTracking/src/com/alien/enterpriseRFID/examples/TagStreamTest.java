@@ -75,7 +75,10 @@ public TagStreamTest() throws Exception {
   System.out.println("Message Listener has Started");
 
   // Instantiate a new reader object, and open a connection to it on COM1
-  AlienClass1Reader reader = new AlienClass1Reader("COM1");
+  AlienClass1Reader reader = new AlienClass1Reader();
+  reader.setConnection("192.168.1.66", 23);
+  reader.setUsername("alien");
+  reader.setPassword("password");
   reader.open();
   System.out.println("Configuring Reader");
 

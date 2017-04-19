@@ -25,7 +25,6 @@ public class ServletRaceManagement extends HttpServlet {
 
 	public ServletRaceManagement() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public void servletEnv(HttpServletRequest request,

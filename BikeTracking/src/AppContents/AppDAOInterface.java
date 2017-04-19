@@ -30,6 +30,8 @@ public interface AppDAOInterface {
 	public RaceHeader updateRace (RaceHeader ent) throws AMSException;
 	public ArrayList<RaceHeader> getAllRaces(RaceHeader race) throws AMSException;
 	public void removeARace(int raceId) throws AMSException;
+	public void removeATagFromRider(int id) throws AMSException;
+	public void removeAllTags() throws AMSException;
 
 	//CHECKPOINT 
 	public CheckPointENT defineAcheckpoint(CheckPointENT ent) throws AMSException;
@@ -37,6 +39,7 @@ public interface AppDAOInterface {
 	public CheckPointENT getAcheckpoint(CheckPointENT ent) throws AMSException;//returns checkpoint id
 	public void removeAcheckpoint(CheckPointENT ent) throws AMSException;//returns checkpoint id
 	public ArrayList<CheckPointENT> getAllcheckpoints(CheckPointENT ent) throws AMSException;//returns checkpoint id
+	ArrayList<CheckPointENT> getAllcheckpointsToAllocateToRace(int raceId, String search) throws AMSException;
 	
 	
 	

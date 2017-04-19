@@ -251,8 +251,10 @@ public class DAO implements AppDAOInterface {
 			rs = ps.executeQuery();
 			ArrayList<RiderENT> r = new ArrayList<>();
 			while (rs.next()) {
-				r.add(new RiderENT(rs.getInt("rider_id"), rs
-						.getString("username"), rs.getInt("rider_tag_id")));
+				RiderENT re = new RiderENT(rs.getInt("rider_id"), rs
+						.getString("username"), rs.getInt("rider_tag_id"));
+				re.setTagRaceId(rs.getInt("race_tag_id"));
+				r.add(re);
 			}
 			race.setRiders(r);
 			query = "SELECT rc.*, c.* FROM race_checkpoints rc "
@@ -646,6 +648,41 @@ public class DAO implements AppDAOInterface {
 		return res;
 	}
 
+	@Override
+	public ArrayList<CheckPointENT> getAllcheckpointsToAllocateToRace(
+			int raceId, String search) throws AMSException {
+		ArrayList<CheckPointENT> res = new ArrayList<>();
+		try {
+			Class.forName(DBDRIVER);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		Connection conn;
+		try {
+			conn = DriverManager.getConnection(DBADDRESS, "root", "");
+			String query = " SELECT c.* FROM checkpoints c "
+					+ " WHERE c.checkpoint_id NOT IN (SELECT checkpoint_id FROM race_checkpoints WHERE"
+					+ " race_header_id = ?) AND c.checkpoint_name like ? ";
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setInt(1, raceId);
+			ps.setString(2, "%" + search + "%");
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				CheckPointENT entTMP = new CheckPointENT(
+						rs.getInt("checkpoint_id"), rs.getString("ip_address"),
+						rs.getString("mac_address"),
+						rs.getString("checkpoint_name"), rs.getString("gps"), 0);
+				res.add(entTMP);
+			}
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw getAMSException("Error in getting a race", e);
+		}
+		return res;
+	}
+
 	private AMSException getAMSException(String defaultMessage, Exception ex) {
 		if (ex == null) {
 			return new AMSException(defaultMessage);
@@ -716,8 +753,7 @@ public class DAO implements AppDAOInterface {
 			while (rs.next()) {
 				RiderENT entTMP = new RiderENT(rs.getInt("rider_id"),
 						rs.getString("username"), rs.getInt("rider_tag_id"),
-						"", rs.getString("date"),
-						rs.getInt("tag_id"));
+						"", rs.getString("date"), rs.getInt("tag_id"));
 				res.add(entTMP);
 			}
 			ps.close();
@@ -741,13 +777,10 @@ public class DAO implements AppDAOInterface {
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = "SELECT r.*, rtd.*, t.* FROM riders r "
-					+ "INNER JOIN rider_tag_date rtd ON rtd.rider_id = r.rider_id "
-					+ "LEFT OUTER JOIN tags t ON t.tag_id = rtd.tag_id "
+			String query = "SELECT r.* FROM riders r "
 					+ "WHERE r.rider_id NOT IN  "
-					+ "(SELECT rtd.rider_id FROM rider_tag_date rtd"
-					+ " INNER JOIN riders r ON rtd.rider_id = r.rider_id"
-					+ " where rtd.date like ?) AND r.username like ?";
+					+ "(SELECT rtd.rider_id FROM rider_tag_date rtd "
+					+ "WHERE rtd.date like ?) AND r.username like ?";
 			PreparedStatement ps = conn.prepareStatement(query);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Date date = new Date();
@@ -756,9 +789,7 @@ public class DAO implements AppDAOInterface {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				RiderENT entTMP = new RiderENT(rs.getInt("rider_id"),
-						rs.getString("username"), rs.getInt("rider_tag_id"),
-						rs.getString("tag_code"), rs.getString("date"),
-						rs.getInt("tag_id"));
+						rs.getString("username"));
 				res.add(entTMP);
 			}
 			ps.close();
@@ -891,5 +922,45 @@ public class DAO implements AppDAOInterface {
 		return res;
 	}
 
+	@Override
+	public void removeATagFromRider(int id) throws AMSException {
+		try {
+			Class.forName(DBDRIVER);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		Connection conn;
+		try {
+			conn = DriverManager.getConnection(DBADDRESS, "root", "");
+			String query = " DELETE FROM rider_tag_date WHERE rider_tag_id = ?";
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setInt(1, id);
+			ps.execute();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw getAMSException("Error in the removing the tag", e);
+		}
+	}
+
+	@Override
+	public void removeAllTags() throws AMSException {
+		try {
+			Class.forName(DBDRIVER);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		Connection conn;
+		try {
+			conn = DriverManager.getConnection(DBADDRESS, "root", "");
+			String query = " DELETE FROM rider_tag_date";
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.execute();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw getAMSException("Error in the removing the tag", e);
+		}
+	}
 
 }

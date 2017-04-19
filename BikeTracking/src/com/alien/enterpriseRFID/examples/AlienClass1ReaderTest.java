@@ -55,9 +55,9 @@ public AlienClass1ReaderTest() throws AlienReaderException {
 
   // To connect to a networked reader instead, use the following:
 
-  reader.setConnection("192.168.1.66");
-  reader.setUsername("");
-  reader.setPassword("");
+  reader.setConnection("192.168.1.66", 23);
+  reader.setUsername("alien");
+  reader.setPassword("password");
 
 
   // Open a connection to the reader
@@ -79,8 +79,6 @@ public AlienClass1ReaderTest() throws AlienReaderException {
                          );
     }
   }
-
-  // Close the connection
   reader.close();
 }
 

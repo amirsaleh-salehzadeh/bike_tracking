@@ -40,11 +40,39 @@ public class ServletTagManagement extends HttpServlet {
 		String searchKey = "";
 		if (request.getParameter("searchKey") != null)
 			searchKey = request.getParameter("searchKey");
-		if (reqCode.equalsIgnoreCase("save")) {
+		if (reqCode.equalsIgnoreCase("delete")) {
+			try {
+				getDAO().removeATagFromRider(
+						Integer.parseInt(request.getParameter("id")));
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (AMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (reqCode.equalsIgnoreCase("deleteAll")) {
+			try {
+				getDAO().removeAllTags();
+			} catch (AMSException e) {
+				e.printStackTrace();
+			}
+		} else if (reqCode.equalsIgnoreCase("save")) {
 			try {
 				getDAO().allocateATagToARider(
 						Integer.parseInt(request.getParameter("riderID")),
 						request.getParameter("tagCode"));
+			} catch (AMSException e) {
+				e.printStackTrace();
+			}
+		} else if (reqCode.equalsIgnoreCase("addRiderToRace")) {
+			try {
+				getDAO().allocateATagRiderToARace(
+						new RiderENT(0, "", Integer.parseInt(request
+								.getParameter("tagId"))),
+						Integer.parseInt(request.getParameter("raceId")));
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
 			} catch (AMSException e) {
 				e.printStackTrace();
 			}
@@ -56,7 +84,8 @@ public class ServletTagManagement extends HttpServlet {
 			e.printStackTrace();
 		}
 		try {
-			response.sendRedirect("tagriders.jsp");
+			response.sendRedirect("tagriders.jsp?raceId="
+					+ request.getParameter("raceId"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

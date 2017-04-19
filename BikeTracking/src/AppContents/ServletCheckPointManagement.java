@@ -31,10 +31,23 @@ public class ServletCheckPointManagement extends HttpServlet {
 	public void servletEnv(HttpServletRequest request,
 			HttpServletResponse response) {
 		String reqCode = request.getParameter("reqCode");
+		if (reqCode.equalsIgnoreCase("addToTheRace")) {
+			try {
+				getDAO().allocateACheckPointToTheRace(
+						new CheckPointENT(Integer.parseInt(request
+								.getParameter("chid"))),
+						Integer.parseInt(request.getParameter("raceId")));
+			} catch (NumberFormatException | AMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			reqCode = "listCheckPoints";
+		}
 		if (reqCode.equalsIgnoreCase("listCheckPoints")) {
 			String checkpoinString = "";
 			try {
-				response.sendRedirect("checkpointmanagement.jsp");
+				response.sendRedirect("checkpointmanagement.jsp?raceId="
+						+ request.getParameter("raceId"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -57,7 +70,8 @@ public class ServletCheckPointManagement extends HttpServlet {
 			int id = 0;
 			CheckPointENT ent = new CheckPointENT(id,
 					request.getParameter("ip"), request.getParameter("mac"),
-					request.getParameter("name"), request.getParameter("gps"),0);
+					request.getParameter("name"), request.getParameter("gps"),
+					0);
 			if (request.getParameter("id") == null
 					|| Integer.parseInt(request.getParameter("id")) <= 0) {
 

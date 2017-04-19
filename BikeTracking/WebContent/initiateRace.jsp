@@ -4,10 +4,12 @@
 <%@page import="AppContents.Common.RaceHeader"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <script type="text/javascript">
+	function showDialog(x){
+		$.mobile.changePage( x, { role: "dialog" } );
+	}
 	function initiateARace() {
 		$("#reqCode").val("initateARace");
 		submitTheForm();
@@ -28,8 +30,17 @@
 		$("#reqCode").val("removeRace");
 		submitTheForm();
 	}
+	function hi(x){
+		$.get(x, function(data){
+			$('#dialog').remove();
+	        $('body').append(data);
+	        $('#dialog').enhanceWithin();
+	        $("#dialog").dialog();
+	});
+		
+    }
 	function errorRemove(){
-alert("Unless there is either one rider or one check point is allocated to the race, " +
+		alert("Unless there is either one rider or one check point is allocated to the race, " +
 		"the remove action can not be performed. Please remove riders or check points first.");
 		}
 </script>
@@ -48,13 +59,13 @@ alert("Unless there is either one rider or one check point is allocated to the r
 			if (rh.getId() <= 0) {
 		%>
 		<div class="ui-block-solo">
-			    <label for="name">Race Title</label><input type="text"
+			    <input type="text"
 				name="name" id="name" placeholder="Race Title"
 				value="<%=rh.getRaceName()%>"
 				class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
 		</div>
 		<div class="ui-block-solo">
-			<label for="lapNo">Number of Laps</label> <input type="number"
+			<input type="number"
 				name="lapNo" id="lapNo" value="<%=rh.getLap_no()%>"
 				placeholder="Number of Laps"
 				class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
@@ -110,33 +121,24 @@ alert("Unless there is either one rider or one check point is allocated to the r
 			</ul>
 		</div>
 		<div class="ui-block-solo">
-			<label for="name">Race Title</label> <input type="text" name="name"
+			<input type="text" name="name"
 				id="name" placeholder="Race Name" value="<%=rh.getRaceName()%>"
 				class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c"
 				data-inline="true">
 		</div>
 		<div class="ui-block-solo">
-			<label for="lapNo">Number of Laps</label><input type="number"
+			<input type="number"
 				name="lapNo" id="lapNo" value="<%=rh.getLap_no()%>"
 				placeholder="Number of laps"
 				class="ui-input-text ui-body-null ui-corner-all ui-shadow-inset ui-body-c">
 		</div>
-		<div data-role="navbar">
-			<ul style="word-wrap: break-word;">
-				<li><a data_role="button" class="ui-corner-all ui-shadow"
-					onclick='showDialog("ServletPopupManagement?reqCode=searchRiders");'>
-						<img src="css/jquery-mobile/images/bike.png" />&nbsp;&nbsp;&nbsp;ADD
-						RIDER
-				</a></li>
-				<li><a data_role="button"
-					class="ui-btn ui-corner-all ui-button-inline ui-shadow"
-					onclick='$("#PopupCheckP").load("ServletPopupManagement?reqCode=searchCheckpoint");'><img
-						src="css/jquery-mobile/images/map.png" />&nbsp;&nbsp;&nbsp;ADD
-						CHECK POINT</a></li>
-			</ul>
-		</div>
 		<div class="ui-grid-a ui-responsive">
 			<div class="ui-block-a">
+				<a class="ui-btn ui-btn-inline ui-shadow ui-corner-all"
+					onclick="loadPage('ServletTagManagement?raceId=<%=rh.getId()%>');"> <img
+					src="css/jquery-mobile/images/bike.png" />&nbsp;&nbsp;&nbsp;ADD
+					RIDER
+				</a>
 				<%
 					if(rider.size()>0){
 				%>
@@ -155,7 +157,7 @@ alert("Unless there is either one rider or one check point is allocated to the r
 							<p class="ui-li-aside">
 								<img src="css/jquery-mobile/images/remove.png"
 									style="cursor: pointer;"
-									onclick="removeRider(<%=rider.get(i).getRiderTagId()%>, <%=rh.getId()%>);" />
+									onclick="removeRider(<%=rider.get(i).getTagRaceId()%>, <%=rh.getId()%>);" />
 							</p></li>
 						<%
 							}
@@ -167,31 +169,24 @@ alert("Unless there is either one rider or one check point is allocated to the r
 				%>
 			</div>
 			<div class="ui-block-b">
+				<a class="ui-btn ui-btn-inline ui-shadow ui-corner-all" 
+					onclick="loadPage('ServletCheckPointManagement?reqCode=listCheckPoints&raceId=<%=rh.getId()%>')"><img
+					src="css/jquery-mobile/images/map.png"  />&nbsp;&nbsp;&nbsp;CHECK
+					POINT</a>
 				<%
 					if(chks2.size()>0){
 				%>
-				<div class="i-corner-all ui-shadow" data-role="collapsible"
-					data-collapsed="false"
-					style="padding: .1em .2em .1em .2em; background-color: #d9d9d9;">
-					<h3>
-						<img src="css/jquery-mobile/images/map.png" />
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check Points
-					</h3>
-					<ol data-role="listview">
-						<%
-							for(int i = 0; i < chks2.size(); i++){
-						%>
-						<li data-icon="false"><%=chks2.get(i).getName()%>
-							<p class="ui-li-aside">
-								<img src="css/jquery-mobile/images/remove.png"
-									style="cursor: pointer;"
-									onclick="removeCheckPoint(<%=chks2.get(i).getCheckPointRaceId()%>, <%=rh.getId()%>);" />
-							</p></li>
-						<%
-							}
-						%>
-					</ol>
-				</div>
+				<%
+					String location = "";
+													for(int i = 0; i < chks2.size(); i++){
+															location += chks2.get(i).getGps().split(",")[0] 
+																	+"," + chks2.get(i).getGps().split(",")[1];
+																	if(i<chks2.size())
+																		location += ";";
+														}
+				%>
+				<iframe src="map.jsp?param=<%=location%>" width="400" height="400"
+					seamless></iframe>
 				<%
 					}
 				%>

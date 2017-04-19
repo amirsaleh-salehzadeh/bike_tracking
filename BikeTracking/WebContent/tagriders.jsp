@@ -6,6 +6,9 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <head>
+<%
+	String raceId = request.getParameter("raceId");
+%>
 <script type="text/javascript">
 	function completeMe() {
 		$("#autocomplete").css("display", "block");
@@ -40,10 +43,28 @@
 		$('#riderID').val($(x).attr("id"));
 
 	}
+	function removeTag(x){
+loadPage("ServletTagManagement?reqCode=delete&id="+x);
+		}
 </script>
 </head>
 <form class="ui-filterable" id="RaceForm" autocomplete="off"
 	action="ServletTagManagement">
+	<%
+		ArrayList<RiderENT> ri = (ArrayList<RiderENT>) session.getAttribute("tagsList");
+	%>
+	<%
+		if(ri!=null){
+	%>
+	<%
+		if(ri.size()>0 && raceId.equalsIgnoreCase("null")){
+	%>
+	<a data_role="button" class="ui-btn ui-corner-all"
+		onclick="loadPage('ServletTagManagement?reqCode=deleteAll');">REMOVE
+		ALL</a>
+	<%
+		}}
+	%>
 	    <input id="autocomplete-input" onkeyup="completeMe()"
 		name="username" data-type="search" placeholder="Find a rider">
 	<input name="reqCode" type="hidden" value="save"> <input
@@ -53,20 +74,24 @@
 			data-filter="true" data-input="#autocomplete-input"
 			style="position: absolute; z-index: 10000; margin: 1em 1em 1em 1em;"></ul>
 	</div>
-	<input name="tagCode"
-		placeholder="Waiting for the RFID tag">
+	<input name="tagCode" placeholder="Waiting for the RFID tag">
 	<div data-role="navbar">
 		<ul>
 			<li><a data_role="button" class="ui-btn ui-corner-all"
-				onclick="submitTheForm();">Confirm</a></li>
+				onclick="submitTheForm();">Allocate Tag</a></li>
 			<li><a data_role="button" class="ui-btn ui-corner-all"
 				onclick="">Scan</a></li>
+			<%
+				if(!raceId.equalsIgnoreCase("null")){
+			%>
+			<li><a data_role="button" class="ui-btn ui-corner-all"
+				onclick="loadPage('ServletRaceManagement?reqCode=start');">Back to Race</a></li>
+			<%
+				}
+			%>
 		</ul>
 	</div>
 </form>
-<%
-	ArrayList<RiderENT> ri = (ArrayList<RiderENT>) session.getAttribute("tagsList");
-%>
 <%
 	if(ri!=null){
 %>
@@ -86,9 +111,12 @@
 			Date date = new Date();
 			for(int i = 0; i < ri.size(); i++){
 				if(!ri.get(i).getDate().contains(dateFormat.format(date))){
+					if(!raceId.equalsIgnoreCase("null")){
+						continue;
+					}
 		%>
 
-		<li data-icon="false" style="background-color: #AD7833">
+		<li data-icon="false" style="background-color: #d9b8dc">
 			<%
 				}else{
 			%>
@@ -98,12 +126,27 @@
 				}
 			%>
 			<h2><%=ri.get(i).getRiderUsername()%>
-				&nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; TAG Code: 
-				<%=ri.get(i).getTagCode()%> &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; <%=ri.get(i).getDate()%> </h2>
+				&nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; TAG Code:
+				<%=ri.get(i).getTagCode()%>
+				&nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp;
+				<%=ri.get(i).getDate()%>
+			</h2>
 			<p class="ui-li-aside">
+				<%
+					if(raceId.equalsIgnoreCase("null")){
+				%>
 				<img src="css/jquery-mobile/images/remove.png"
 					style="cursor: pointer;"
 					onclick="removeTag(<%=ri.get(i).getRiderTagId()%>);" />
+				<%
+					}else{
+				%>
+				<img src="css/jquery-mobile/images/goto.png"
+					style="cursor: pointer;" title="Add to Race"
+					onclick="loadPage('ServletTagManagement?reqCode=addRiderToRace&tagId=<%=ri.get(i).getRiderTagId()%>&raceId=<%=raceId%>');" />
+				<%
+					}
+				%>
 			</p>
 		</li>
 		<%

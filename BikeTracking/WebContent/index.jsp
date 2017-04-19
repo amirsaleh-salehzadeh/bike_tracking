@@ -4,10 +4,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
 	href="css/themes/default/jquery.mobile-1.4.5.min.css">
-<link rel="shortcut icon" href="">
 <link rel="stylesheet"
 	href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,40 +15,14 @@
 <script src="js/jquery.form.js"></script>
 <script src="js/index.js"></script>
 <script src="js/jquery.mobile-1.4.5.min.js"></script>
-<style type="text/css">
-#divPopup {
-	display: none; /* Hidden by default */
-	position: fixed; /* Stay in place */
-	z-index: 1000; /* Sit on top */
-	margin: auto;
-	width: 20em; /* Full width */
-	height: 30em; /* Full height */
-	overflow: auto; /* Enable scroll if needed */
-	background-color: rgb(0, 0, 0); /* Fallback color */
-	background-color: #fff; /* Black w/ opacity */
-}
-
-/* Modal Content */
-.divPopup-contents {
-	background-color: #fefefe;
-	margin: auto;
-	padding: 20px;
-	border: 1px solid #888;
-	width: 70%;
-}
-</style>
 <script type="text/javascript">
-	function showDialog(x) {
-		$("#divPopup").html("");
-		$("#divPopup").load(x).trigger("create");
-		$("#divPopup").css("display", "block");
-	}
 	$(document).ready(function() {
 		// 		loadPage('main.jsp');
 		// 		$("div#menuContent").load('menu.jsp').trigger("create");
 	});
 	$(document).ajaxComplete(function(event, xhr, settings) {
 		$("#systemContainer").trigger("create");
+		$("div#mainBodyContent").trigger("create");
 	});
 	function loadPage(x) {
 		$("div#mainBodyContent").load(x).trigger("create");
@@ -68,7 +41,7 @@
 			cache : false,
 			success : function(data) {
 				$("#mainBodyContent").html(data);
-				$(document).trigger("create");
+				$("#systemContainer").trigger("create");
 				$(".ui-popup-active").css("display", "none");
 				return true;
 			}
@@ -79,10 +52,7 @@
 <body>
 	<div data-role="page" class="jqm-demos jqm-home" id="systemContainer">
 		<div data-role="header" class="jqm-header">
-			<h2>
-				<img src="css/jquery-mobile/images/rovermcc-logo-1.png"
-					alt="NMMU Web Application">
-			</h2>
+		<h2></h2>
 			<a href="#"
 				class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-gear ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
 		</div>
@@ -124,14 +94,6 @@
 				</li>
 			</ul>
 		</div>
-	</div>
-	<div id="divPopup" style="display: none;"></div>
-	<div id="divPopup" class="modal">
-		<div class="divPopup-contents">
-			<span class="close" title="Close">x</span>
-			<iframe name="iframe_a" width="95%" height="600px"></iframe>
-		</div>
-
 	</div>
 </body>
 </html>
