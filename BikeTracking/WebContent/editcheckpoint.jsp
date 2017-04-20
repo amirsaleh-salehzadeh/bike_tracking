@@ -26,6 +26,35 @@ html,body {
 </style>
 </head>
 <body>
+<%
+	String error = (String) request.getSession().getAttribute("error");
+	String success = (String) request.getSession().getAttribute(
+			"success");
+	if (!error.equalsIgnoreCase("") || !success.equalsIgnoreCase("")) {
+%>
+<div class="ui-block-solo" class="ui-corner-all"
+	style="background-color: white" id="messageDiv">
+	<a
+		style="color: black; cursor: pointer; bold; position: relative; top: 0; right: 0; float: right;"
+		title="close" onclick="$('div#messageDiv').fadeOut();">X</a>
+	<%
+		if (!error.equalsIgnoreCase("")) {
+	%>
+	<label
+		style="color: red; font-weight: bold;"><img src="css/jquery-mobile/images/cautionR.png" /> &nbsp;&nbsp;&nbsp;&nbsp; <%=error%>
+	</label>
+	<%
+		} else if (!success.equalsIgnoreCase("")) {
+	%>
+	<label style="color: green; font-weight: bold;"><img
+		src="css/jquery-mobile/images/cautionG.png" />&nbsp;&nbsp;&nbsp;&nbsp;<%=success%></label>
+	<%
+		}
+	%>
+</div>
+<%
+	}
+%>
 	<form id="RaceForm" action="ServletCheckPointManagement">
 		<input name="reqCode" type="hidden" value="save"> <input
 			type="text" name="name" placeholder="Check Point Name"
@@ -50,7 +79,7 @@ html,body {
 				style="margin: .4em 5em .4em 5em;"
 				class="ui-btn ui-corner-all ui-button-right ui-shadow"
 				onclick='submitTheForm();'> <img title="View on map"
-					src="css/jquery-mobile/images/save.png" /> &nbsp;&nbsp;&nbsp;SAVE
+					src="css/jquery-mobile/images/save.png" /> &nbsp;&nbsp;&nbsp; <%if(chkENT.getId()>0){%>UPDATE<%}else{ %>SAVE<%}%>
 			</a></li>
 		</ul>
 	</div>

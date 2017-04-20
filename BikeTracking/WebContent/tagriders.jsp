@@ -99,7 +99,6 @@ loadPage("ServletTagManagement?reqCode=delete&id="+x);
 	if(ri.size()>0){
 %>
 <div class="i-corner-all ui-shadow" data-role="collapsible"
-	data-collapsed="true"
 	style="padding: .1em .2em .1em .2em; background-color: #d9d9d9;">
 	<h3>
 		<img src="css/jquery-mobile/images/bike.png" />

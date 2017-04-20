@@ -7,16 +7,6 @@ public class RiderENT {
 	String tagCode;
 	String date;
 	int tagID;
-	int tagRaceId;
-	
-
-	public int getTagRaceId() {
-		return tagRaceId;
-	}
-
-	public void setTagRaceId(int tagRaceId) {
-		this.tagRaceId = tagRaceId;
-	}
 
 	public RiderENT() {
 	}

@@ -31,6 +31,10 @@ public class ServletRaceManagement extends HttpServlet {
 			HttpServletResponse response) {
 		String reqCode = request.getParameter("reqCode");
 		RaceHeader rh = new RaceHeader();
+		String error = "";
+		String success = "";
+		request.getSession().setAttribute("error", error);
+		request.getSession().setAttribute("success", success);
 		if (reqCode.equalsIgnoreCase("removeRace")) {
 			try {
 				getDAO().removeARace(

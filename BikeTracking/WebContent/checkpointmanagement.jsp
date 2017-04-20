@@ -74,7 +74,35 @@
 	}
 </script>
 </head>
-
+<%
+	String error = (String) request.getSession().getAttribute("error");
+	String success = (String) request.getSession().getAttribute(
+			"success");
+	if (!error.equalsIgnoreCase("") || !success.equalsIgnoreCase("")) {
+%>
+<div class="ui-block-solo" class="ui-corner-all"
+	style="background-color: white" id="messageDiv">
+	<a
+		style="color: black; cursor: pointer; bold; position: relative; top: 0; right: 0; float: right;"
+		title="close" onclick="$('div#messageDiv').fadeOut();">X</a>
+	<%
+		if (!error.equalsIgnoreCase("")) {
+	%>
+	<label
+		style="color: red; font-weight: bold;"><img src="css/jquery-mobile/images/cautionR.png" /> &nbsp;&nbsp;&nbsp;&nbsp; <%=error%>
+	</label>
+	<%
+		} else if (!success.equalsIgnoreCase("")) {
+	%>
+	<label style="color: green; font-weight: bold;"><img
+		src="css/jquery-mobile/images/cautionG.png" />&nbsp;&nbsp;&nbsp;&nbsp;<%=success%></label>
+	<%
+		}
+	%>
+</div>
+<%
+	}
+%>
 <div class="ui-block-solo" id="dialog"
 	style="padding: .4em 1em .4em 1em;">
 	<input type="text" name="checkpoint" onkeyup="getList();" id="chkpoint"
@@ -99,7 +127,9 @@
 	if (!raceId.equalsIgnoreCase("null")) {
 %>
 <div class="ui-block-solo">
-	<a data_role="button" class="ui-btn ui-corner-all" onclick="loadPage('ServletRaceManagement?reqCode=start');">Back to Race </a>
+	<a data_role="button" class="ui-btn ui-corner-all"
+		onclick="loadPage('ServletRaceManagement?reqCode=start');">Back to
+		Race </a>
 </div>
 <%
 	}

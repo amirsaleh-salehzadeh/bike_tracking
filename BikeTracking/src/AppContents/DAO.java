@@ -26,10 +26,10 @@ public class DAO implements AppDAOInterface {
 
 	public static void main(String[] args) {
 		DAO dao = new DAO();
-		try {
+//		try {
 			// ///////////////////////
-			System.out.println(dao.allocateATagToARider(11, "dfafZ"));
-			System.out.println(dao.getTagID("asdfasdfaf"));
+//			System.out.println(dao.allocateATagToARider(11, "dfafZ"));
+//			System.out.println(dao.getTagID("asdfasdfaf"));
 			// ///////////////////////
 			// RaceHeader h = new RaceHeader(3, "amir3");
 			// h = dao.defineARace(h);
@@ -43,10 +43,10 @@ public class DAO implements AppDAOInterface {
 			// "gps");
 			// ch = dao.defineAcheckpoint(ch);
 			// System.out.println(ch.getGps());
-		} catch (AMSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		} catch (AMSException e) {
+//			// TODO Auto-generated catch block
+//			throw getAMSException(e.getMessage(),e);
+//		}
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class DAO implements AppDAOInterface {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -76,8 +76,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in the tag allocation", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return true;
 	}
@@ -88,7 +87,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		boolean res = false;
 		Connection conn;
@@ -106,13 +105,12 @@ public class DAO implements AppDAOInterface {
 			conn.close();
 			res = true;
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in starting the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return res;
 	}
 
-	private boolean checkDuplicateDateAndTagEntry(int UID, int TagID) {
+	private boolean checkDuplicateDateAndTagEntry(int UID, int TagID) throws AMSException {
 		try {
 			Class.forName(DBDRIVER);
 			Connection conn = DriverManager
@@ -132,16 +130,16 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		return true;
 	}
 
-	private static int getTagID(String TagCode) {
+	private int getTagID(String TagCode) throws AMSException{
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		int tagId = 0;
@@ -165,7 +163,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		return tagId;
 	}
@@ -175,8 +173,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -203,8 +200,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in defining a race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return race;
 	}
@@ -216,7 +212,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -244,17 +240,18 @@ public class DAO implements AppDAOInterface {
 				race.setcDateTime(rs.getString("created_time"));
 			}
 			ps.close();
-			query = "SELECT rt.*, r.* FROM race_tags rt "
-					+ "INNER JOIN rider_tag_date rtd ON rtd.rider_tag_id = rt.rider_tag_id "
-					+ "LEFT OUTER JOIN riders r ON r.rider_id = rtd.rider_id WHERE race_header_id = "
+			query = "SELECT rtd.*, r.*, t.* FROM rider_tag_date rtd "
+					+ "LEFT JOIN riders r ON r.rider_id = rtd.rider_id "
+					+ " LEFT JOIN tags t ON t.tag_id = rtd.tag_id WHERE race_header_id = "
 					+ race.getId();
 			ps = conn.prepareStatement(query);
 			rs = ps.executeQuery();
 			ArrayList<RiderENT> r = new ArrayList<>();
 			while (rs.next()) {
 				RiderENT re = new RiderENT(rs.getInt("rider_id"),
-						rs.getString("username"), rs.getInt("rider_tag_id"));
-				re.setTagRaceId(rs.getInt("race_tag_id"));
+						rs.getString("username"), rs.getInt("rider_tag_id"),
+						rs.getString("tag_code"), rs.getString("date"),
+						rs.getInt("tag_id"));
 				r.add(re);
 			}
 			race.setRiders(r);
@@ -279,14 +276,19 @@ public class DAO implements AppDAOInterface {
 			ArrayList<RaceLine> rl = new ArrayList<>();
 			while (rs.next()) {
 				long milliseconds = Long.parseLong(rs.getString("time"));
-				String t = (int) ((milliseconds / (1000*60*60)) % 24) + ":" + (int) ((milliseconds / (1000*60)) % 60)
-						 + ":" +(int) (milliseconds / 1000) % 60 
-						+ "-" + rs.getString("time").substring(
+				String t = (int) ((milliseconds / (1000 * 60 * 60)) % 24)
+						+ ":"
+						+ (int) ((milliseconds / (1000 * 60)) % 60)
+						+ ":"
+						+ (int) (milliseconds / 1000)
+						% 60
+						+ "-"
+						+ rs.getString("time").substring(
 								rs.getString("time").length() - 3,
 								rs.getString("time").length());
 				System.out.println(t);
 				rl.add(new RaceLine(rs.getInt("checkpoint_race_id"), t, rs
-						.getInt("race_tag_id"), rs.getInt("race_header_id"), rs
+						.getInt("rider_tag_id"), rs.getInt("race_header_id"), rs
 						.getInt("race_line_id")));
 
 			}
@@ -294,8 +296,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting a race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return race;
 	}
@@ -306,7 +307,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		if (this.getArace(race).getsDateTime() != null && !push)
 			throw getAMSException("The race has been already started", null);
@@ -322,8 +323,7 @@ public class DAO implements AppDAOInterface {
 			conn.close();
 			race = getArace(race);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in starting the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return race;
 	}
@@ -340,7 +340,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -357,8 +357,7 @@ public class DAO implements AppDAOInterface {
 			ps.execute();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in the checkpoint allocation", null);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return this.getArace(new RaceHeader(raceID));
 	}
@@ -369,24 +368,19 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = " INSERT INTO race_tags (race_header_id, rider_tag_id) SELECT * FROM "
-					+ "(SELECT ? , ?) AS tmp WHERE NOT EXISTS "
-					+ "(SELECT race_tag_id FROM race_tags WHERE race_header_id = ? and rider_tag_id = ?) LIMIT 1;";
+			String query = " UPDATE rider_tag_date SET race_header_id = ? WHERE rider_tag_id = ?";
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.setInt(1, raceID);
 			ps.setInt(2, rider.getRiderTagId());
-			ps.setInt(3, raceID);
-			ps.setInt(4, rider.getRiderTagId());
 			ps.execute();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in allocating a rider to the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return this.getArace(new RaceHeader(raceID));
 	}
@@ -397,20 +391,18 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = " DELETE FROM race_tags WHERE race_tag_id = ?";
+			String query = " UPDATE rider_tag_date SET race_header_id = NULL WHERE rider_tag_id = ?";
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.setInt(1, riderTagRaceId);
 			ps.execute();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException(
-					"Error in the removing the rider from the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return this.getArace(new RaceHeader(raceID));
 	}
@@ -421,7 +413,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -432,9 +424,7 @@ public class DAO implements AppDAOInterface {
 			ps.execute();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException(
-					"Error in the removing the rider from the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return this.getArace(new RaceHeader(raceID));
 	}
@@ -444,7 +434,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -459,9 +449,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException(
-					"Error in the removing the rider from the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return this.getArace(new RaceHeader(line.getHeaderId()));
 	}
@@ -479,7 +467,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -505,8 +493,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting a race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return null;
 	}
@@ -517,31 +504,42 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		if (getAcheckpoint(ent).getId() > 0) {
 			throw getAMSException("The checkpoint already exists", null);
 		}
 		Connection conn;
+		
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = "INSERT INTO checkpoints (ip_address, mac_address, checkpoint_name, gps) SELECT * FROM "
-					+ "(SELECT ?, ?, ?, ?) AS tmp WHERE NOT EXISTS "
-					+ "(SELECT checkpoint_id FROM checkpoints WHERE mac_address = ? or checkpoint_name = ?) LIMIT 1;";
+			String query = "SELECT * FROM checkpoints WHERE mac_address = ?";
 			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setString(1, ent.getMac());
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				throw getAMSException("The current MAC address has been registered as the checkpoint name: " +rs.getString("checkpoint_name"), null);
+			}
+			query = "SELECT * FROM checkpoints WHERE checkpoint_name = ?";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, ent.getName());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				throw getAMSException("The current checkpoint NAME has been registered before", null);
+			}
+			ps.close();
+			query = "INSERT INTO checkpoints (ip_address, mac_address, checkpoint_name, gps) values (?, ?, ?, ?) ";
+			ps = conn.prepareStatement(query);
 			ps.setString(1, ent.getIp());
 			ps.setString(2, ent.getMac());
 			ps.setString(3, ent.getName());
 			ps.setString(4, ent.getGps());
-			ps.setString(5, ent.getMac());
-			ps.setString(6, ent.getName());
 			ps.execute();
 			ps.close();
-			query = "SELECT checkpoint_id FROM checkpoints WHERE mac_address = ? or checkpoint_name = ?";
+			query = "SELECT checkpoint_id FROM checkpoints WHERE checkpoint_name = ?";
 			ps = conn.prepareStatement(query);
-			ps.setString(1, ent.getMac());
-			ps.setString(2, ent.getName());
-			ResultSet rs = ps.executeQuery();
+			ps.setString(1, ent.getName());
+			rs = ps.executeQuery();
 			while (rs.next()) {
 				ent = this.getAcheckpoint(new CheckPointENT(rs
 						.getInt("checkpoint_id")));
@@ -549,7 +547,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		return ent;
 	}
@@ -560,13 +558,28 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = " UPDATE checkpoints SET ip_address = ?, mac_address = ?, checkpoint_name = ?, gps = ? WHERE checkpoint_id = ?";
+			String query = "SELECT * FROM checkpoints WHERE mac_address = ?";
 			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setString(1, ent.getMac());
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				throw getAMSException("The current MAC address has been registered as the checkpoint name: " +rs.getString("checkpoint_name"), null);
+			}
+			query = "SELECT * FROM checkpoints WHERE checkpoint_name = ?";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, ent.getName());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				throw getAMSException("The current checkpoint NAME has been registered before", null);
+			}
+			ps.close();
+			query = " UPDATE checkpoints SET ip_address = ?, mac_address = ?, checkpoint_name = ?, gps = ? WHERE checkpoint_id = ?";
+			ps = conn.prepareStatement(query);
 			ps.setString(1, ent.getIp());
 			ps.setString(2, ent.getMac());
 			ps.setString(3, ent.getName());
@@ -576,8 +589,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in starting the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return ent;
 	}
@@ -587,7 +599,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		if (ent.getId() <= 0)
 			return new CheckPointENT();
@@ -607,8 +619,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting a checkpoint", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return ent;
 	}
@@ -618,7 +629,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -630,9 +641,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException(
-					"Error in the removing the rider from the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 	}
 
@@ -643,7 +652,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -662,8 +671,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting a race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return res;
 	}
@@ -675,7 +683,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -697,8 +705,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting a race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return res;
 	}
@@ -708,7 +715,6 @@ public class DAO implements AppDAOInterface {
 			return new AMSException(defaultMessage);
 		}
 		ex.printStackTrace();
-		// else if(ex.getMessage().startsWith(""){}
 		return new AMSException(defaultMessage, ex);
 	}
 
@@ -720,7 +726,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -743,8 +749,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting riders", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return res;
 	}
@@ -756,14 +761,14 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
 			String query = "SELECT r.*, rtd.* FROM riders r "
 					+ "INNER JOIN rider_tag_date rtd ON rtd.rider_id = r.rider_id "
-					+ "WHERE rtd.date like ? AND r.username like ?";
+					+ "WHERE rtd.date like ? AND r.username like ? and rtd.race_header_id IS NULL";
 			PreparedStatement ps = conn.prepareStatement(query);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Date date = new Date();
@@ -779,8 +784,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting riders", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return res;
 	}
@@ -792,7 +796,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -815,8 +819,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting riders", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return res;
 	}
@@ -826,7 +829,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -852,8 +855,7 @@ public class DAO implements AppDAOInterface {
 				return race;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting a race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return race;
 	}
@@ -863,7 +865,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -875,9 +877,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException(
-					"Error in the removing the rider from the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 
 	}
@@ -887,7 +887,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -901,8 +901,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in starting the race", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return this.getArace(ent);
 	}
@@ -914,7 +913,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -936,8 +935,7 @@ public class DAO implements AppDAOInterface {
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in getting riders", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 		return res;
 	}
@@ -947,7 +945,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -958,8 +956,7 @@ public class DAO implements AppDAOInterface {
 			ps.execute();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in the removing the tag", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 	}
 
@@ -968,7 +965,7 @@ public class DAO implements AppDAOInterface {
 		try {
 			Class.forName(DBDRIVER);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			throw getAMSException(e.getMessage(),e);
 		}
 		Connection conn;
 		try {
@@ -978,8 +975,7 @@ public class DAO implements AppDAOInterface {
 			ps.execute();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw getAMSException("Error in the removing the tag", e);
+			throw getAMSException(e.getMessage(),e);
 		}
 	}
 

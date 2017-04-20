@@ -30,6 +30,8 @@ public class ServletCheckPointManagement extends HttpServlet {
 
 	public void servletEnv(HttpServletRequest request,
 			HttpServletResponse response) {
+		String error = "";
+		String success = "";
 		String reqCode = request.getParameter("reqCode");
 		if (reqCode.equalsIgnoreCase("addToTheRace")) {
 			try {
@@ -46,6 +48,8 @@ public class ServletCheckPointManagement extends HttpServlet {
 		if (reqCode.equalsIgnoreCase("listCheckPoints")) {
 			String checkpoinString = "";
 			try {
+				request.getSession().setAttribute("error", error);
+				request.getSession().setAttribute("success", success);
 				response.sendRedirect("checkpointmanagement.jsp?raceId="
 						+ request.getParameter("raceId"));
 			} catch (IOException e) {
@@ -77,20 +81,24 @@ public class ServletCheckPointManagement extends HttpServlet {
 
 				try {
 					ent = getDAO().defineAcheckpoint(ent);
+					success = "Check Point Saved Successfully";
 				} catch (AMSException e) {
-					// TODO Auto-generated catch block
+					error = e.getMessage();
 					e.printStackTrace();
 				}
 			} else {
 				ent.setId(Integer.parseInt(request.getParameter("id")));
 				try {
 					ent = getDAO().updateAcheckpoint(ent);
+					success = "Check Point Updated Successfully";
 				} catch (AMSException e) {
-					// TODO Auto-generated catch block
+					error = e.getMessage();
 					e.printStackTrace();
 				}
 
 			}
+			request.getSession().setAttribute("error", error);
+			request.getSession().setAttribute("success", success);
 			request.getSession().setAttribute("chkENT", ent);
 			try {
 				response.sendRedirect("editcheckpoint.jsp");

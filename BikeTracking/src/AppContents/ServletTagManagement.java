@@ -34,6 +34,10 @@ public class ServletTagManagement extends HttpServlet {
 
 	public void servletEnv(HttpServletRequest request,
 			HttpServletResponse response) {
+		String error = "";
+		String success = "";
+		request.getSession().setAttribute("error", error);
+		request.getSession().setAttribute("success", success);
 		String reqCode = request.getParameter("reqCode");
 		if (reqCode == null)
 			reqCode = "";
@@ -45,10 +49,8 @@ public class ServletTagManagement extends HttpServlet {
 				getDAO().removeATagFromRider(
 						Integer.parseInt(request.getParameter("id")));
 			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (AMSException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else if (reqCode.equalsIgnoreCase("deleteAll")) {
@@ -78,8 +80,12 @@ public class ServletTagManagement extends HttpServlet {
 			}
 		}
 		try {
-			request.getSession().setAttribute("tagsList",
-					getDAO().getTaggedRidersList(searchKey));
+			if (request.getParameter("raceId") != null)
+				request.getSession().setAttribute("tagsList",
+						getDAO().getAllTaggedRidersTODAY(searchKey));
+			else
+				request.getSession().setAttribute("tagsList",
+						getDAO().getTaggedRidersList(searchKey));
 		} catch (AMSException e) {
 			e.printStackTrace();
 		}

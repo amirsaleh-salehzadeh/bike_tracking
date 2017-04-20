@@ -157,7 +157,7 @@
 							<p class="ui-li-aside">
 								<img src="css/jquery-mobile/images/remove.png"
 									style="cursor: pointer;"
-									onclick="removeRider(<%=rider.get(i).getTagRaceId() %>, <%=rh.getId()%>);" />
+									onclick="removeRider(<%=rider.get(i).getRiderTagId() %>, <%=rh.getId()%>);" />
 							</p></li>
 						<%
 							}

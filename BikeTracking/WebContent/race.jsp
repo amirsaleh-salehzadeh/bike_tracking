@@ -14,30 +14,29 @@ $(document).ready(function(){
 					dataType : "json",
 					success : function(data) {
 						var ht = "<thead><tr class='ui-bar-d' id='headerT'><th>Rider</th>";
-						$.each(data.raceLines, function(m, n) {
 						$.each(data.checkPoint, function(k, l) {
 							ht += "<th><img src='css/jquery-mobile/images/map.png' title='"+l.name+"' /></th>";
-						});});
+						});
 						ht += "</tr></thead><tbody>";
 						
 						$.each(data.riders, function(i, j) {
 							ht += "<tr><th><img src='css/jquery-mobile/images/bike.png' title='"+j.riderUsername+"' /></th>";
 							$.each(data.checkPoint, function(k, l) {
+								ht+="<td id='"+l.checkPointRaceId+"-"+j.riderTagId+"'";
 								$.each(data.raceLines, function(m, n) {
-									if(n.checkPointId==l.checkPointRaceId
-											&&j.tagRaceId==n.riderTagId){
-										ht+="<td>"+n.time+"</td>";
-									}else{
-										ht+="<td>a</td>";
+									if(n.checkPointId == l.checkPointRaceId
+											&& j.riderTagId == n.riderTagId){
+										ht += " title ='" + n.time + "' bgcolor= '#008800'";
 									}
+									console.log(n.raceLineId + ":"+j.riderTagId+"-"+n.riderTagId +"-"+n.checkPointId +"-"+ l.checkPointRaceId);
+								});
+								ht += "></td>";
 							});
-							
-						});
 							ht +="</tr>";
 						});
 						
 						ht += "</tbody>";
-										$("table#raceMonit").html(ht);
+										$("table#raceMonit").html(ht).trigger("create");
 						// 				$ul.listview("refresh");
 						// 				$ul.trigger("updatelayout");
 					}
@@ -54,8 +53,8 @@ $(document).ready(function(){
 			style="cursor: pointer;"><img
 			src="css/jquery-mobile/images/stop.png" />&nbsp;&nbsp;&nbsp;STOP</a>
 	</div>
-	<table data-role="table" id="raceMonit"
-		class="ui-body-d ui-shadow table-stripe ui-responsive">
+	<table data-role="table" class="ui-shadow ui-responsive" id="raceMonit"
+		 border="1">
 	</table>
 </body>
 </html>
