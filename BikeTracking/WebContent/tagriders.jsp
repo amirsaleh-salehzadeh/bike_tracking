@@ -48,8 +48,38 @@ loadPage("ServletTagManagement?reqCode=delete&id="+x);
 		}
 </script>
 </head>
+<%
+	String error = (String) request.getSession().getAttribute("error");
+	String success = (String) request.getSession().getAttribute(
+	"success");
+	if (!error.equalsIgnoreCase("") || !success.equalsIgnoreCase("")) {
+%>
+<div class="ui-block-solo" class="ui-corner-all"
+	style="background-color: white" id="messageDiv">
+	<a
+		style="color: black; cursor: pointer; bold; position: relative; top: 0; right: 0; float: right;"
+		title="close" onclick="$('div#messageDiv').fadeOut();">X</a>
+	<%
+		if (!error.equalsIgnoreCase("")) {
+	%>
+	<label style="color: red; font-weight: bold;"><img
+		src="css/jquery-mobile/images/cautionR.png" />
+		&nbsp;&nbsp;&nbsp;&nbsp; <%=error%> </label>
+	<%
+		} else if (!success.equalsIgnoreCase("")) {
+	%>
+	<label style="color: green; font-weight: bold;"><img
+		src="css/jquery-mobile/images/cautionG.png" />&nbsp;&nbsp;&nbsp;&nbsp;<%=success%></label>
+	<%
+		}
+	%>
+</div>
+<%
+	}
+%>
 <form class="ui-filterable" id="RaceForm" autocomplete="off"
 	action="ServletTagManagement">
+	<input type="hidden" name="raceId" value="<%=raceId%>">
 	<%
 		ArrayList<RiderENT> ri = (ArrayList<RiderENT>) session.getAttribute("tagsList");
 	%>
@@ -85,7 +115,8 @@ loadPage("ServletTagManagement?reqCode=delete&id="+x);
 				if(!raceId.equalsIgnoreCase("null")){
 			%>
 			<li><a data_role="button" class="ui-btn ui-corner-all"
-				onclick="loadPage('ServletRaceManagement?reqCode=start');">Back to Race</a></li>
+				onclick="loadPage('ServletRaceManagement?reqCode=start');">Back
+					to Race</a></li>
 			<%
 				}
 			%>
@@ -99,6 +130,7 @@ loadPage("ServletTagManagement?reqCode=delete&id="+x);
 	if(ri.size()>0){
 %>
 <div class="i-corner-all ui-shadow" data-role="collapsible"
+	data-collapsed="false"
 	style="padding: .1em .2em .1em .2em; background-color: #d9d9d9;">
 	<h3>
 		<img src="css/jquery-mobile/images/bike.png" />

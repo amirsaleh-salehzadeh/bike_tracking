@@ -63,10 +63,7 @@
 				<li data-filtertext="demos homepage" data-icon="home"><a
 					href="index.jsp">Home</a></li>
 				<li data-filtertext="demos homepage"><a href="#"
-					onclick="loadPage('ServletTagManagement');">Tag Riders</a></li>
-				<li data-filtertext="demos homepage"><a href="#"
-					onclick="loadPage('ServletRaceManagement?reqCode=start');">Start
-						A Race</a></li>
+					onclick="loadPage('ServletRaceManagement?reqCode=start');">Race</a></li>
 				<li data-role="collapsible" data-enhanced="true"
 					data-collapsed-icon="carat-d" data-expanded-icon="carat-u"
 					data-iconpos="right" data-inset="false"
@@ -84,11 +81,13 @@
 								data-filtertext="form checkboxradio widget radio input radio buttons controlgroups"><a
 								href="#"
 								onclick="loadPage('ServletCheckPointManagement?reqCode=listCheckPoints');"
-								data-ajax="false">Check Point Management</a></li>
+								data-ajax="true">Check Point Management</a></li>
 							<li
 								data-filtertext="form checkboxradio widget checkbox input checkboxes controlgroups"><a
-								href="t_security.do?reqCode=roleManagement" data-ajax="false">Race
+								href="t_security.do?reqCode=roleManagement" data-ajax="true">Race
 									Management</a></li>
+									<li data-filtertext="form checkboxradio widget checkbox input checkboxes controlgroups"><a href="#"
+					onclick="loadPage('ServletTagManagement');">Tag Riders</a></li>
 						</ul>
 					</div>
 				</li>

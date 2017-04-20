@@ -36,35 +36,45 @@ public class ServletTagManagement extends HttpServlet {
 			HttpServletResponse response) {
 		String error = "";
 		String success = "";
-		request.getSession().setAttribute("error", error);
-		request.getSession().setAttribute("success", success);
+		request.getSession().setAttribute("error", "");
+		request.getSession().setAttribute("success", "");
 		String reqCode = request.getParameter("reqCode");
 		if (reqCode == null)
 			reqCode = "";
 		String searchKey = "";
+		String raceId = null;
+		if (request.getParameter("raceId") != null)
+			raceId = request.getParameter("raceId");
 		if (request.getParameter("searchKey") != null)
 			searchKey = request.getParameter("searchKey");
 		if (reqCode.equalsIgnoreCase("delete")) {
 			try {
 				getDAO().removeATagFromRider(
 						Integer.parseInt(request.getParameter("id")));
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
+				success = "The tag removed from the rider successfully";
 			} catch (AMSException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 		} else if (reqCode.equalsIgnoreCase("deleteAll")) {
 			try {
 				getDAO().removeAllTags();
+				success = "All tags that are not allocated to the riders in the race are removed";
 			} catch (AMSException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 		} else if (reqCode.equalsIgnoreCase("save")) {
 			try {
-				getDAO().allocateATagToARider(
-						Integer.parseInt(request.getParameter("riderID")),
-						request.getParameter("tagCode"));
+				if (!request.getParameter("riderID").equalsIgnoreCase("")) {
+					getDAO().allocateATagToARider(
+							Integer.parseInt(request.getParameter("riderID")),
+							request.getParameter("tagCode"));
+					success = "The tag has been allocated to the rider successfully";
+				} else
+					error = "The rider doesn't exist";
 			} catch (AMSException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 		} else if (reqCode.equalsIgnoreCase("addRiderToRace")) {
@@ -72,15 +82,17 @@ public class ServletTagManagement extends HttpServlet {
 				getDAO().allocateATagRiderToARace(
 						new RiderENT(0, "", Integer.parseInt(request
 								.getParameter("tagId"))),
-						Integer.parseInt(request.getParameter("raceId")));
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
+						Integer.parseInt(raceId));
+				success = "The rider added to the race successfully";
 			} catch (AMSException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 		}
+		request.getSession().setAttribute("error", error);
+		request.getSession().setAttribute("success", success);
 		try {
-			if (request.getParameter("raceId") != null)
+			if (raceId != null)
 				request.getSession().setAttribute("tagsList",
 						getDAO().getAllTaggedRidersTODAY(searchKey));
 			else
@@ -90,8 +102,7 @@ public class ServletTagManagement extends HttpServlet {
 			e.printStackTrace();
 		}
 		try {
-			response.sendRedirect("tagriders.jsp?raceId="
-					+ request.getParameter("raceId"));
+			response.sendRedirect("tagriders.jsp?raceId=" + raceId);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

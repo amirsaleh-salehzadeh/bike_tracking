@@ -33,17 +33,21 @@ public class ServletRaceManagement extends HttpServlet {
 		RaceHeader rh = new RaceHeader();
 		String error = "";
 		String success = "";
-		request.getSession().setAttribute("error", error);
-		request.getSession().setAttribute("success", success);
+		request.getSession().setAttribute("error", "");
+		request.getSession().setAttribute("success", "");
 		if (reqCode.equalsIgnoreCase("removeRace")) {
 			try {
 				getDAO().removeARace(
 						Integer.parseInt(request.getParameter("raceId")));
+				success = "The race removed successfully";
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			} catch (AMSException e) {
 				e.printStackTrace();
+				error = e.getMessage();
 			}
+			request.getSession().setAttribute("error", error);
+			request.getSession().setAttribute("success", success);
 			reqCode = "start";
 		}
 		if (reqCode.equalsIgnoreCase("start")) {
@@ -59,11 +63,15 @@ public class ServletRaceManagement extends HttpServlet {
 			rh.setRaceName(request.getParameter("name"));
 			rh.setLap_no(Integer.parseInt(request.getParameter("lapNo")));
 			try {
-				if (reqCode.equalsIgnoreCase("initateARace"))
+				if (reqCode.equalsIgnoreCase("initateARace")){
 					rh = getDAO().defineARace(rh);
-				if (reqCode.equalsIgnoreCase("saveUpdate"))
+					success = "The race initiated";
+				}if (reqCode.equalsIgnoreCase("saveUpdate")){
 					rh = getDAO().updateRace(rh);
+					success = "The race updated successfully";
+				}
 			} catch (AMSException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 			request.getSession().setAttribute("raceHeader", rh);
@@ -73,9 +81,11 @@ public class ServletRaceManagement extends HttpServlet {
 						new RiderENT(0, "", Integer.parseInt(request
 								.getParameter("riderID"))),
 						Integer.parseInt(request.getParameter("raceId")));
+				success = "The rider added to the race successfully";
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			} catch (AMSException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 		} else if (reqCode.equalsIgnoreCase("addCheckPoint")) {
@@ -84,9 +94,11 @@ public class ServletRaceManagement extends HttpServlet {
 						new CheckPointENT(Integer.parseInt(request
 								.getParameter("checkpointID"))),
 						Integer.parseInt(request.getParameter("raceId")));
+				success = "The checkpoint added to the race successfully";
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			} catch (AMSException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 		} else if (reqCode.equalsIgnoreCase("removeCheckPoint")) {
@@ -94,11 +106,11 @@ public class ServletRaceManagement extends HttpServlet {
 				rh = getDAO().removeACheckPointFromTheRace(
 						Integer.parseInt(request.getParameter("checkpointId")),
 						Integer.parseInt(request.getParameter("raceId")));
+				success = "The checkpoint removed from the race successfully";
 			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (AMSException e) {
-				// TODO Auto-generated catch block
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 			request.getSession().setAttribute("raceHeader", rh);
@@ -107,16 +119,18 @@ public class ServletRaceManagement extends HttpServlet {
 				rh = getDAO().removeATagRiderFromTheRace(
 						Integer.parseInt(request.getParameter("riderId")),
 						Integer.parseInt(request.getParameter("raceId")));
+				success = "The rider removed from the race successfully";
 			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (AMSException e) {
-				// TODO Auto-generated catch block
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 			request.getSession().setAttribute("raceHeader", rh);
 		}
 		try {
+			request.getSession().setAttribute("error", error);
+			request.getSession().setAttribute("success", success);
 			response.sendRedirect("setupRace.jsp?reqCode=" + reqCode);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

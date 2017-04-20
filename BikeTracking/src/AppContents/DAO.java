@@ -563,16 +563,18 @@ public class DAO implements AppDAOInterface {
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = "SELECT * FROM checkpoints WHERE mac_address = ?";
+			String query = "SELECT * FROM checkpoints WHERE mac_address = ? and checkpoint_id <> ?";
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.setString(1, ent.getMac());
+			ps.setInt(2, ent.getId());
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				throw getAMSException("The current MAC address has been registered as the checkpoint name: " +rs.getString("checkpoint_name"), null);
 			}
-			query = "SELECT * FROM checkpoints WHERE checkpoint_name = ?";
+			query = "SELECT * FROM checkpoints WHERE checkpoint_name = ? AND checkpoint_id <> ?";
 			ps = conn.prepareStatement(query);
 			ps.setString(1, ent.getName());
+			ps.setInt(2, ent.getId());
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				throw getAMSException("The current checkpoint NAME has been registered before", null);
@@ -950,8 +952,16 @@ public class DAO implements AppDAOInterface {
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = " DELETE FROM rider_tag_date WHERE rider_tag_id = ?";
+			String query = "SELECT * FROM rider_tag_date WHERE rider_tag_id = ? AND race_header_id IS NOT NULL";
 			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				throw getAMSException("The tag cannot be removed as the rider is busy in a race. " +
+						"Please remove the rider from the race first.", null);
+			}
+			query = " DELETE FROM rider_tag_date WHERE rider_tag_id = ?";
+			ps = conn.prepareStatement(query);
 			ps.setInt(1, id);
 			ps.execute();
 			ps.close();
@@ -970,7 +980,7 @@ public class DAO implements AppDAOInterface {
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection(DBADDRESS, "root", "");
-			String query = " DELETE FROM rider_tag_date";
+			String query = "DELETE FROM rider_tag_date WHERE race_header_id IS NULL";
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.execute();
 			ps.close();

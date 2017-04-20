@@ -32,6 +32,8 @@ public class ServletCheckPointManagement extends HttpServlet {
 			HttpServletResponse response) {
 		String error = "";
 		String success = "";
+		request.getSession().setAttribute("error", "");
+		request.getSession().setAttribute("success", "");
 		String reqCode = request.getParameter("reqCode");
 		if (reqCode.equalsIgnoreCase("addToTheRace")) {
 			try {
@@ -39,20 +41,21 @@ public class ServletCheckPointManagement extends HttpServlet {
 						new CheckPointENT(Integer.parseInt(request
 								.getParameter("chid"))),
 						Integer.parseInt(request.getParameter("raceId")));
+				success = "The rider added to the race successfully";
 			} catch (NumberFormatException | AMSException e) {
-				// TODO Auto-generated catch block
+				error = e.getMessage();
 				e.printStackTrace();
 			}
+			request.getSession().setAttribute("error", error);
+			request.getSession().setAttribute("success", success);
 			reqCode = "listCheckPoints";
 		}
 		if (reqCode.equalsIgnoreCase("listCheckPoints")) {
-			String checkpoinString = "";
 			try {
-				request.getSession().setAttribute("error", error);
-				request.getSession().setAttribute("success", success);
 				response.sendRedirect("checkpointmanagement.jsp?raceId="
 						+ request.getParameter("raceId"));
 			} catch (IOException e) {
+				error = e.getMessage();
 				e.printStackTrace();
 			}
 		} else if (reqCode.equalsIgnoreCase("editCheckPoint")) {
