@@ -14,17 +14,28 @@ $(document).ready(function(){
 					dataType : "json",
 					success : function(data) {
 						var ht = "<thead><tr class='ui-bar-d' id='headerT'><th>Rider</th>";
+						$.each(data.raceLines, function(m, n) {
 						$.each(data.checkPoint, function(k, l) {
 							ht += "<th><img src='css/jquery-mobile/images/map.png' title='"+l.name+"' /></th>";
-						});
+						});});
 						ht += "</tr></thead><tbody>";
+						
 						$.each(data.riders, function(i, j) {
 							ht += "<tr><th><img src='css/jquery-mobile/images/bike.png' title='"+j.riderUsername+"' /></th>";
 							$.each(data.checkPoint, function(k, l) {
-								ht+="<td></td>";
+								$.each(data.raceLines, function(m, n) {
+									if(n.checkPointId==l.checkPointRaceId
+											&&j.tagRaceId==n.riderTagId){
+										ht+="<td>"+n.time+"</td>";
+									}else{
+										ht+="<td>a</td>";
+									}
 							});
+							
+						});
 							ht +="</tr>";
 						});
+						
 						ht += "</tbody>";
 										$("table#raceMonit").html(ht);
 						// 				$ul.listview("refresh");

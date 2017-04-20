@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.struts.taglib.tiles.GetAttributeTag;
 
@@ -251,8 +252,8 @@ public class DAO implements AppDAOInterface {
 			rs = ps.executeQuery();
 			ArrayList<RiderENT> r = new ArrayList<>();
 			while (rs.next()) {
-				RiderENT re = new RiderENT(rs.getInt("rider_id"), rs
-						.getString("username"), rs.getInt("rider_tag_id"));
+				RiderENT re = new RiderENT(rs.getInt("rider_id"),
+						rs.getString("username"), rs.getInt("rider_tag_id"));
 				re.setTagRaceId(rs.getInt("race_tag_id"));
 				r.add(re);
 			}
@@ -271,6 +272,25 @@ public class DAO implements AppDAOInterface {
 						rs.getInt("race_checkpoint_id")));
 			}
 			race.setCheckPoint(c);
+			query = "SELECT * FROM race_line " + "WHERE race_header_id = "
+					+ race.getId();
+			ps = conn.prepareStatement(query);
+			rs = ps.executeQuery();
+			ArrayList<RaceLine> rl = new ArrayList<>();
+			while (rs.next()) {
+				long milliseconds = Long.parseLong(rs.getString("time"));
+				String t = (int) ((milliseconds / (1000*60*60)) % 24) + ":" + (int) ((milliseconds / (1000*60)) % 60)
+						 + ":" +(int) (milliseconds / 1000) % 60 
+						+ "-" + rs.getString("time").substring(
+								rs.getString("time").length() - 3,
+								rs.getString("time").length());
+				System.out.println(t);
+				rl.add(new RaceLine(rs.getInt("checkpoint_race_id"), t, rs
+						.getInt("race_tag_id"), rs.getInt("race_header_id"), rs
+						.getInt("race_line_id")));
+
+			}
+			race.setRaceLines(rl);
 			ps.close();
 			conn.close();
 		} catch (SQLException e) {
