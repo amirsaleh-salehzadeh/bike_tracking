@@ -7,6 +7,18 @@ public class RaceLine {
 	int headerId;
 	int raceLineId;
 
+	public RaceLine() {
+	}
+
+	public RaceLine(int checkPointId, int riderTagId, int headerId,
+			int raceLineId) {
+		super();
+		this.checkPointId = checkPointId;
+		this.riderTagId = riderTagId;
+		this.headerId = headerId;
+		this.raceLineId = raceLineId;
+	}
+
 	public RaceLine(int checkPointId, String time, int riderTagId,
 			int headerId, int raceLineId) {
 		super();
@@ -15,14 +27,6 @@ public class RaceLine {
 		this.riderTagId = riderTagId;
 		this.headerId = headerId;
 		this.raceLineId = raceLineId;
-	}
-	
-	public RaceLine(int checkPointId, int riderTagId,
-			int headerId) {
-		super();
-		this.checkPointId = checkPointId;
-		this.riderTagId = riderTagId;
-		this.headerId = headerId;
 	}
 
 	public int getCheckPointId() {

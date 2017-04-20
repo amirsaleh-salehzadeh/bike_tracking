@@ -57,7 +57,6 @@ public class GetService extends Application {
 		} catch (AMSException e) {
 			e.printStackTrace();
 		}
-		System.out.println(json);
 		return json;
 	}
 
@@ -82,7 +81,6 @@ public class GetService extends Application {
 		} catch (AMSException e) {
 			e.printStackTrace();
 		}
-		System.out.println(json);
 		return json;
 	}
 
@@ -109,7 +107,6 @@ public class GetService extends Application {
 		} catch (AMSException e) {
 			e.printStackTrace();
 		}
-		System.out.println(json);
 		return json;
 	}
 
@@ -131,7 +128,6 @@ public class GetService extends Application {
 		} catch (AMSException e) {
 			e.printStackTrace();
 		}
-		System.out.println(json);
 		return json;
 	}
 
@@ -148,6 +144,27 @@ public class GetService extends Application {
 		try {
 			json = mapper.writeValueAsString(getDAO().getAllTaggedRidersTODAY(
 					searchKey));
+		} catch (JsonGenerationException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (AMSException e) {
+			e.printStackTrace();
+		}
+		return json;
+	}
+	
+	@GET
+	@Path("/MonitorRace")
+	@Produces("application/json")
+	public String monitorRace(@QueryParam("raceId") int raceId) {
+		String json = "";
+		String searchKey = "";
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			json = mapper.writeValueAsString(getDAO().getArace(new RaceHeader(raceId)));
 		} catch (JsonGenerationException e) {
 			e.printStackTrace();
 		} catch (JsonMappingException e) {

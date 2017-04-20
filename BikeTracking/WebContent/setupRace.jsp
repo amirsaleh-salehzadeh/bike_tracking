@@ -14,9 +14,9 @@
 		$("#reqCode").val("initateARace");
 		submitTheForm();
 	}
-	function removeCheckPoint(chk, rh){
+	function removeCheckPoint(chk){
 		loadPage($("#RaceForm").attr("action")
-				+"?reqCode=removeCheckPoint&checkpointId="+chk+"&raceId="+rh);
+				+"?reqCode=removeCheckPoint&checkpointId="+chk+"&raceId="+$("#raceId").val());
 	}
 	function removeRider(ri, rh){
 		loadPage($("#RaceForm").attr("action")
@@ -112,7 +112,7 @@
 					if(rider.size()>0&&chks2.size()>0){
 				%>
 				<li><a data_role="button" class="ui-corner-all ui-shadow"
-					href="#"> <img src="css/jquery-mobile/images/goto.png" />&nbsp;&nbsp;&nbsp;GO
+					href="#" onclick="loadPage('race.jsp?raceId=<%=rh.getId()%>')"> <img src="css/jquery-mobile/images/goto.png" />&nbsp;&nbsp;&nbsp;GO
 						TO RACE
 				</a></li>
 				<%
@@ -157,7 +157,7 @@
 							<p class="ui-li-aside">
 								<img src="css/jquery-mobile/images/remove.png"
 									style="cursor: pointer;"
-									onclick="removeRider(<%=rider.get(i).getTagRaceId()%>, <%=rh.getId()%>);" />
+									onclick="removeRider(<%=rider.get(i).getTagRaceId() %>, <%=rh.getId()%>);" />
 							</p></li>
 						<%
 							}
@@ -178,14 +178,15 @@
 				%>
 				<%
 					String location = "";
-													for(int i = 0; i < chks2.size(); i++){
-															location += chks2.get(i).getGps().split(",")[0] 
-																	+"," + chks2.get(i).getGps().split(",")[1];
-																	if(i<chks2.size())
-																		location += ";";
-														}
+																	for(int i = 0; i < chks2.size(); i++){
+																			location += chks2.get(i).getGps().split(",")[0] 
+																					+"," + chks2.get(i).getGps().split(",")[1]
+																							+","+chks2.get(i).getId()+","+chks2.get(i).getName();
+																					if(i<chks2.size())
+																						location += ";";
+																		}
 				%>
-				<iframe src="map.jsp?param=<%=location%>" width="400" height="400"
+				<iframe src="map.jsp?param=<%=location%>&rhid=<%=rh.getId() %>" width="400" height="400"
 					seamless></iframe>
 				<%
 					}

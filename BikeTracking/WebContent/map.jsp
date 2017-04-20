@@ -28,16 +28,25 @@
 
 <%} else {
 				String location = "";
+				String ids = "";
+				String names ="";
 				String req = request.getParameter("param");
 				for (int i = 0; i < req.split(";").length; i++) {
 					location += "{lat: " + req.split(";")[i].split(",")[0]
 							+ ", lng: " + req.split(";")[i].split(",")[1] + "}";
-					if ((i + 1) < req.split(";").length)
+							ids+="'"+req.split(";")[i].split(",")[2]+"'";
+							names+= "'"+req.split(";")[i].split(",")[3]+"'";
+					if ((i + 1) < req.split(";").length){
 						location += ",";
+						ids += ",";
+						names += ",";
+					}
 				}%>
 		var myLatLng = [
 <%=location%>
 	];
+		var ids = [<%=ids%>];
+		var names = [<%=names%>];
 		var myOptions = {
 			zoom : 10,
 			center : myLatLng[0],
@@ -53,17 +62,30 @@
 			strokeWeight : 2
 		});
 
-		for(var i = 0 ; i <= myLatLng.length ; i++){
+		for(var i = 0 ; i < myLatLng.length ; i++){
 			var marker = new google.maps.Marker({
 				position : myLatLng[i],
 				map : map,
-				title : 'Hello World!'
+				title : names[i]
 			});
-
+			var longpress = false;
+			var tmp = "'ServletRaceManagement?reqCode=removeCheckPoint&checkpointId="+ids[i]+"&rhid=<%=request.getParameter("rhid")%>'";
+		    google.maps.event.addListener(marker,'click', function (event) {
+			    if(longpress){
+					$("div#mainBodyContent").load(tmp);
+				           }
+		        });
+		    google.maps.event.addListener(marker, 'mousedown', function(event){
+		                start = new Date().getTime();           
+		            });
+		    google.maps.event.addListener(marker, 'mouseup', function(event){
+		                end = new Date().getTime();
+		                    longpress = (end - start < 2000) ? false : true;         
+		            });
 			}
-
 		RidePath.setMap(map);
-<%}%>
+<%} %>
+
 	}
 </script>
 <script async defer

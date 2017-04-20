@@ -113,7 +113,7 @@ public class ServletRaceManagement extends HttpServlet {
 			request.getSession().setAttribute("raceHeader", rh);
 		}
 		try {
-			response.sendRedirect("initiateRace.jsp?reqCode=" + reqCode);
+			response.sendRedirect("setupRace.jsp?reqCode=" + reqCode);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
