@@ -1,10 +1,15 @@
 package AppContents;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -35,6 +40,21 @@ public class ServletRaceManagement extends HttpServlet {
 		String success = "";
 		request.getSession().setAttribute("error", "");
 		request.getSession().setAttribute("success", "");
+		if (reqCode.equalsIgnoreCase("report")) {
+			response.setContentType("text/csv");
+			response.setHeader("Content-Disposition", "attachment; filename=\""
+					+ request.getParameter("filename") + ".csv\"");
+			try {
+				OutputStream outputStream = response.getOutputStream();
+				String outputResult = getDAO().exportToCSV(
+						Integer.parseInt(request.getParameter("raceId")));
+				outputStream.write(outputResult.getBytes());
+				outputStream.flush();
+				outputStream.close();
+			} catch (Exception e) {
+				System.out.println(e.toString());
+			}
+		}
 		if (reqCode.equalsIgnoreCase("removeRace")) {
 			try {
 				getDAO().removeARace(
@@ -63,10 +83,11 @@ public class ServletRaceManagement extends HttpServlet {
 			rh.setRaceName(request.getParameter("name"));
 			rh.setLap_no(Integer.parseInt(request.getParameter("lapNo")));
 			try {
-				if (reqCode.equalsIgnoreCase("initateARace")){
+				if (reqCode.equalsIgnoreCase("initateARace")) {
 					rh = getDAO().defineARace(rh);
 					success = "The race initiated";
-				}if (reqCode.equalsIgnoreCase("saveUpdate")){
+				}
+				if (reqCode.equalsIgnoreCase("saveUpdate")) {
 					rh = getDAO().updateRace(rh);
 					success = "The race updated successfully";
 				}

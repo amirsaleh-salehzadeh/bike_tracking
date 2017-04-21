@@ -14,7 +14,7 @@ public interface AppDAOInterface {
 	//RACE CONFIG
 	public RaceHeader defineARace(RaceHeader race) throws AMSException;
 	public RaceHeader startTheRace(RaceHeader race, boolean push) throws AMSException;
-	public RaceHeader finishTheRace(RaceHeader race) throws AMSException;
+	public RaceHeader finishTheRace(RaceHeader race, boolean push) throws AMSException;
 	public RaceHeader getTheLatestOpenRace(RaceHeader race) throws AMSException;
 	public RaceHeader getArace(RaceHeader race) throws AMSException;
 	public RaceHeader allocateACheckPointToTheRace(CheckPointENT ent, int raceID) throws AMSException;
@@ -32,18 +32,16 @@ public interface AppDAOInterface {
 	public void removeARace(int raceId) throws AMSException;
 	public void removeATagFromRider(int id) throws AMSException;
 	public void removeAllTags() throws AMSException;
+	public ArrayList<RaceHeader> getAllRace(RaceHeader rh)  throws AMSException;
 
 	//CHECKPOINT 
 	public CheckPointENT defineAcheckpoint(CheckPointENT ent) throws AMSException;
-	public CheckPointENT updateAcheckpoint(CheckPointENT ent) throws AMSException;//returns checkpoint id
-	public CheckPointENT getAcheckpoint(CheckPointENT ent) throws AMSException;//returns checkpoint id
-	public void removeAcheckpoint(CheckPointENT ent) throws AMSException;//returns checkpoint id
-	public ArrayList<CheckPointENT> getAllcheckpoints(CheckPointENT ent) throws AMSException;//returns checkpoint id
+	public CheckPointENT updateAcheckpoint(CheckPointENT ent) throws AMSException;
+	public CheckPointENT getAcheckpoint(CheckPointENT ent) throws AMSException;
+	public void removeAcheckpoint(CheckPointENT ent) throws AMSException;
+	public ArrayList<CheckPointENT> getAllcheckpoints(CheckPointENT ent) throws AMSException;
 	ArrayList<CheckPointENT> getAllcheckpointsToAllocateToRace(int raceId, String search) throws AMSException;
-	
-	
-	
-	
+	public String exportToCSV(int raceId) throws AMSException;
 	
 	//check the number of checkpoints before finalize the race
 	//the race has been started do u want to push it

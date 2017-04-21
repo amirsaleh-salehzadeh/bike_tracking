@@ -13,15 +13,12 @@ package tools;
 		private int type=0;
 		
 		public AMSException(String message) {
-			// TODO Auto-generated constructor stub
 			super(message);
 		}
 		public AMSException(String message,Throwable cause) {
-			// TODO Auto-generated constructor stub
 			super(message,cause);
 		}
 		public AMSException(Throwable cause) {
-			// TODO Auto-generated constructor stub
 			super(cause);
 		}
 		public int getType() {

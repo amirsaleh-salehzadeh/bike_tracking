@@ -93,7 +93,8 @@ html,body {
 					lat : -34.397,
 					lng : 150.644
 				},
-				zoom : 15
+				zoom : 15,
+				mapTypeId : 'satellite'
 			});
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(function(position) {

@@ -6,44 +6,6 @@
 	pageEncoding="ISO-8859-1"%>
 <html>
 <head>
-<script type="text/javascript">
-	function showDialog(x){
-		$.mobile.changePage( x, { role: "dialog" } );
-	}
-	function initiateARace() {
-		$("#reqCode").val("initateARace");
-		submitTheForm();
-	}
-	function removeCheckPoint(chk){
-		loadPage($("#RaceForm").attr("action")
-				+"?reqCode=removeCheckPoint&checkpointId="+chk+"&raceId="+$("#raceId").val());
-	}
-	function removeRider(ri, rh){
-		loadPage($("#RaceForm").attr("action")
-				+"?reqCode=removeRider&riderId="+ri+"&raceId="+rh);
-	}
-	function saveUpdate(){
-		$("#reqCode").val("saveUpdate");
-		submitTheForm();
-	}
-	function removeRace(){
-		$("#reqCode").val("removeRace");
-		submitTheForm();
-	}
-	function hi(x){
-		$.get(x, function(data){
-			$('#dialog').remove();
-	        $('body').append(data);
-	        $('#dialog').enhanceWithin();
-	        $("#dialog").dialog();
-	});
-		
-    }
-	function errorRemove(){
-		alert("Unless there is either one rider or one check point is allocated to the race, " +
-		"the remove action can not be performed. Please remove riders or check points first.");
-		}
-</script>
 </head>
 <body>
 	<%
@@ -133,7 +95,7 @@
 				%>
 				<li><a data_role="button" class="ui-corner-all ui-shadow"
 					href="#" onclick="saveUpdate();"> <img
-						src="css/jquery-mobile/images/save.png" />&nbsp;&nbsp;&nbsp;SAVE
+						src="css/jquery-mobile/images/save.png" />&nbsp;&nbsp;&nbsp;UPDATE
 				</a></li>
 				<%
 					if(rider.size()>0&&chks2.size()>0){

@@ -9,9 +9,27 @@ public class RaceHeader {
 	String fDateTime;
 	String cDateTime;
 	String raceName;
+	int countRiders;
+	int countCheckpoints;
 	ArrayList<RaceLine> raceLines;
 	ArrayList<CheckPointENT> checkPoint;
 	ArrayList<RiderENT> riders;
+
+	public int getCountRiders() {
+		return countRiders;
+	}
+
+	public void setCountRiders(int countRiders) {
+		this.countRiders = countRiders;
+	}
+
+	public int getCountCheckpoints() {
+		return countCheckpoints;
+	}
+
+	public void setCountCheckpoints(int countCheckpoints) {
+		this.countCheckpoints = countCheckpoints;
+	}
 
 	public RaceHeader() {
 	}

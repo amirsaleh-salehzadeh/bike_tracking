@@ -16,14 +16,14 @@
 	var myOptions = {
 			zoom : 10,
 			center : myLatLng,
-			mapTypeId : google.maps.MapTypeId.ROADMAP
+			mapTypeId : 'satellite'
 		};
 		var map = new google.maps.Map(document.getElementById("map_canvas"),
 				myOptions);
 		var marker = new google.maps.Marker({
 			position : myLatLng,
 			map : map,
-			title : 'Hello World!'
+			title : ''
 		});
 
 <%} else {
@@ -50,7 +50,7 @@
 		var myOptions = {
 			zoom : 10,
 			center : myLatLng[0],
-			mapTypeId : google.maps.MapTypeId.ROADMAP
+			mapTypeId : 'satellite'
 		};
 		var map = new google.maps.Map(document.getElementById("map_canvas"),
 				myOptions);

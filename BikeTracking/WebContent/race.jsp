@@ -3,74 +3,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <script type="text/javascript">
 $(document).ready(function(){
-	raceMonitoring();
-});
-	function raceMonitoring() {
-		$.ajax({
-			url : "http://localhost:8090/BikeTracking/REST/GetWS/MonitorRace?raceId=<%=request.getParameter("raceId")%>",
-					dataType : "json",
-					success : function(data) {
-						var ht = "<thead><tr class='ui-bar-d' id='headerT'><th>Rider</th>";
-						$
-								.each(
-										data.checkPoint,
-										function(k, l) {
-											ht += "<th><img src='css/jquery-mobile/images/map.png' title='"+l.name+"' /></th>";
-										});
-						ht += "</tr></thead><tbody>";
-
-						$
-								.each(
-										data.riders,
-										function(i, j) {
-											ht += "<tr><th><img src='css/jquery-mobile/images/bike.png' title='"+j.riderUsername+"' /></th>";
-											$
-													.each(
-															data.checkPoint,
-															function(k, l) {
-																ht += "<td id='"
-																		+ l.checkPointRaceId
-																		+ "-"
-																		+ j.riderTagId
-																		+ "'";
-																$
-																		.each(
-																				data.raceLines,
-																				function(
-																						m,
-																						n) {
-																					if (n.checkPointId == l.checkPointRaceId
-																							&& j.riderTagId == n.riderTagId) {
-																						ht += " title ='"
-																								+ n.time
-																								+ "' bgcolor= '#008800'";
-																					}
-																					console
-																							.log(n.raceLineId
-																									+ ":"
-																									+ j.riderTagId
-																									+ "-"
-																									+ n.riderTagId
-																									+ "-"
-																									+ n.checkPointId
-																									+ "-"
-																									+ l.checkPointRaceId);
-																				});
-																ht += "></td>";
-															});
-											ht += "</tr>";
-										});
-
-						ht += "</tbody>";
-						$("table#raceMonit").html(ht).trigger("create");
-						// 				$ul.listview("refresh");
-						// 				$ul.trigger("updatelayout");
-					}
-				});
-	}
+	raceMonitoring("http://localhost:8090/BikeTracking/REST/GetWS/MonitorRace?raceId=<%=request.getParameter("raceId")%>");
+					});
 </script>
 </head>
 <body>
@@ -103,13 +39,55 @@ $(document).ready(function(){
 	<%
 		}
 	%>
-	<div class="ui-block-a">
-		<a style="cursor: pointer;"
-			class="ui-btn ui-btn-inline ui-shadow ui-corner-all" onclick=""><img
-			src="css/jquery-mobile/images/play.png" />&nbsp;&nbsp;&nbsp;START</a> <a
-			class="ui-btn ui-btn-inline ui-shadow ui-corner-all" onclick=""
-			style="cursor: pointer;"><img
-			src="css/jquery-mobile/images/stop.png" />&nbsp;&nbsp;&nbsp;STOP</a>
+	<div class="ui-block-solo">
+		<a style="cursor: pointer;" data-role="button"
+			class="ui-btn ui-btn-inline ui-shadow ui-corner-all"
+			onclick="startTheRace();" id="startBTN"><img
+			src="css/jquery-mobile/images/play.png" />&nbsp;&nbsp;&nbsp;START</a> <span
+			id="timer"
+			style="font-size: 32pt; font-family: Orbitron, sans-serif;"></span>
+			
+		<a class="ui-btn ui-shadow ui-corner-all" onclick="finishTheRace();"
+			style="cursor: pointer; float: right; position: relative; top: 0; right: 0;"><img
+			src="css/jquery-mobile/images/stop.png" />&nbsp;&nbsp;&nbsp;FINISH</a>
+			<span id="stime" style="float: right; position: relative; font-size: 16px; font-family: Orbitron, sans-serif;"></span>
+			<span id="stime" style="float: right; position: relative; font-size: 16px; font-weight:bold; letter-spacing:15px; font-family:arial,sans-serif">START TIME:</span>
+	</div>
+
+	<input id="raceId" type="hidden"
+		value="<%=request.getParameter("raceId")%>">
+	<input id="riderId" name="riderId" type="hidden" value="">
+	<input id="startedtime" type="hidden" value="">
+	<input id="checkpointId" name="checkpointId" type="hidden">
+	<div class="ui-block-solo">
+		<div class="ui-grid-b">
+			<div class="ui-block-a">
+				<input id="hour" placeholder="Hours">
+			</div>
+			<div class="ui-block-b">
+				<input id="min" placeholder="Minutes">
+			</div>
+			<div class="ui-block-c">
+				<input id="sec" placeholder="Seconds">
+			</div>
+		</div>
+	</div>
+	<div class="ui-block-solo">
+		<div class="ui-grid-b">
+			<div class="ui-block-a">
+				<input id="riderT" placeholder="Select a rider" disabled="disabled">
+			</div>
+			<div class="ui-block-b">
+				<input id="checkpointT" placeholder="Select a checkpoint"
+					disabled="disabled">
+			</div>
+			<div class="ui-block-c">
+				<a style="cursor: pointer;" data-role="button"
+					class="ui-btn ui-btn-inline ui-shadow ui-corner-all"
+					onclick="" id="startBTN"><img
+					src="css/jquery-mobile/images/save.png" style="float: right;" />&nbsp;&nbsp;REGISTER</a>
+			</div>
+		</div>
 	</div>
 	<table data-role="table" class="ui-shadow ui-responsive" id="raceMonit"
 		border="1">
